@@ -1,0 +1,24 @@
+export function fi<T>(): T {
+	return undefined as T;
+}
+
+export function resolve(path: string): string {
+	const parts = path.split('/');
+
+	return parts
+		.reduce<string[]>((newParts, segment) => {
+			if (segment === '..') {
+				if (newParts.length === 0) {
+					throw new Error('beyond svelte');
+				} else {
+					return newParts.slice(0, -1);
+				}
+			} else if (segment === '.' || segment === '') {
+				return newParts;
+			} else {
+				return [...newParts, segment];
+			}
+		}, [])
+		.join('/');
+}
+
