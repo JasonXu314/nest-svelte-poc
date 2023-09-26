@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { SvelteModule } from './svelte/svelte.module';
+import { ClientModule } from './client/module/client.module';
 
 @Module({
-	imports: [SvelteModule],
+	imports: [ClientModule],
 	controllers: [AppController],
 	providers: [AppService]
 })

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Form from './components/Form.svelte';
+	import Form from '../components/Form.svelte';
 
 	let count: number = 0,
 		text: string = '';

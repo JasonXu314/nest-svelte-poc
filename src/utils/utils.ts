@@ -1,3 +1,5 @@
+import { readdirSync, statSync } from 'fs';
+
 export function fi<T>(): T {
 	return undefined as T;
 }
@@ -20,5 +22,17 @@ export function resolve(path: string): string {
 			}
 		}, [])
 		.join('/');
+}
+
+export function walkDir(path: string, fn: (file: string) => void): void {
+	const dir = readdirSync(path);
+
+	dir.forEach((entry) => {
+		if (statSync(`${path}/${entry}`).isDirectory()) {
+			walkDir(`${path}/${entry}`, fn);
+		} else {
+			fn(`${path}/${entry}`);
+		}
+	});
 }
 

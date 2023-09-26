@@ -5,20 +5,19 @@ import preprocessor from 'svelte-preprocess';
 import { CompileResult, compile, preprocess } from 'svelte/compiler';
 import { Context, SourceTextModule, SyntheticModule, createContext } from 'vm';
 
-interface RenderResult {
+export interface RenderResult {
 	html: string;
 	css: { code: string; map: null };
 	head: string;
 }
 
-interface RenderModuleCtx {
+export interface RenderModuleCtx {
 	component: {
 		render(props?: any, extra?: { $$slots: any; context: Map<any, any> }): RenderResult;
 	};
 }
 
 async function impt(mod: string, context: Context): Promise<SyntheticModule> {
-	console.log(mod);
 	const module = await import(mod);
 
 	const m = new SyntheticModule(
@@ -36,7 +35,7 @@ async function impt(mod: string, context: Context): Promise<SyntheticModule> {
 
 @Injectable()
 export class SvelteService {
-	public async render(path: string): Promise<{ ssr: RenderResult; dom: CompileResult }> {
+	public async render(path: string): Promise<{ ssr: RenderModuleCtx; dom: CompileResult }> {
 		const contents = readFileSync(path).toString();
 
 		const preprocessed = await preprocess(contents, preprocessor({ typescript: { compilerOptions: { module: 'es2020', target: 'es2020' } } }), {
@@ -44,21 +43,21 @@ export class SvelteService {
 		});
 		const ssrResult = compile(preprocessed.code, { generate: 'ssr', hydratable: true, name: 'App' });
 		const domResult = compile(preprocessed.code, { generate: 'dom', hydratable: true, sveltePath: '/__svelte__', name: 'App' });
-		console.log(domResult.js.code);
+		// console.log(domResult.js.code);
 
 		const ssr = await this.eval(ssrResult);
 		domResult.js.code = domResult.js.code.replace(/import (.+) from (?:'(.+).svelte'|"(.+).svelte")/g, (_, ...args) => {
 			const imptContent = args[0];
 			const imptPath = args[1] || args[2];
 
-			return `import ${imptContent} from '/__svelte__/${resolve(`${imptPath}`)}.svelte'`;
+			return `import ${imptContent} from '/__client__/${resolve(`routes/${imptPath}`)}.svelte'`;
 		});
 
 		return { ssr, dom: domResult };
 	}
 
 	public async load(path: string): Promise<{ ssr: CompileResult; dom: CompileResult }> {
-		const contents = readFileSync(`src/client/${path}`).toString();
+		const contents = readFileSync(path).toString();
 
 		const preprocessed = await preprocess(contents, preprocessor({ typescript: { compilerOptions: { module: 'es2020', target: 'es2020' } } }), {
 			filename: path
@@ -96,12 +95,12 @@ export class SvelteService {
 			});
 	}
 
-	private async eval(result: CompileResult): Promise<RenderResult> {
+	private async eval(result: CompileResult): Promise<RenderModuleCtx> {
 		const context = createContext();
 		const module = new SourceTextModule(result.js.code, { context });
 		await module.link(async (specifier) => {
 			if (specifier.endsWith('.svelte')) {
-				const { ssr } = await this.load(specifier);
+				const { ssr } = await this.load(resolve(`src/client/routes/${specifier}`));
 				const module = new SourceTextModule(ssr.js.code, { context });
 
 				return module;
@@ -114,8 +113,7 @@ export class SvelteService {
 		await renderModule.link((specifier) => (specifier === '%%component' ? module : impt(specifier, context)));
 		await renderModule.evaluate();
 
-		const { component } = module.context as RenderModuleCtx;
-		return component.render();
+		return module.context as RenderModuleCtx;
 	}
 }
 
