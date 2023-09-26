@@ -11,7 +11,7 @@ export class AppService {
 		// console.log(result.ssr, result.dom.js);
 
 		return `
-		<html>
+		<html data-theme="dark">
 			<head>
 				${result.ssr.head}
 				<style>
