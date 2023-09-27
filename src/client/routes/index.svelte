@@ -1,20 +1,22 @@
 <script lang="ts">
-	import Form from '../components/Form.svelte';
+	import { Todo } from 'dist/models';
 
-	let count: number = 0,
-		text: string = '';
+	export let initTodos: Todo[];
+
+	let todos: Todo[] = initTodos ?? [];
 </script>
 
 <svelte:head>
 	<link rel="stylesheet" href="https://mypico.jasonxu.dev/min" />
 </svelte:head>
 
-<button
-	on:click={() => {
-		count++;
-		console.log(text);
-	}}
->
-	Count: {count}
-</button>
-<Form bind:value={text} />
+<main class="container">
+	<h1>Todos</h1>
+	{#each todos as todo (todo.id)}
+		<section class="todo">
+			<h3>{todo.title}</h3>
+			<p>{todo.description}</p>
+			<input type="checkbox" checked={todo.completed} />
+		</section>
+	{/each}
+</main>

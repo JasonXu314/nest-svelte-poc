@@ -29,14 +29,14 @@ export class ClientService {
 		});
 	}
 
-	public renderRoute(path: string): string {
+	public renderRoute(path: string, props?: any): string {
 		const app = this.routeMap.get(path === '' ? 'index' : path.endsWith('/') ? path + 'index' : path);
 
 		if (!app) {
 			throw new NotFoundException();
 		}
 
-		const { head, css, html } = app.ssr.component.render();
+		const { head, css, html } = app.ssr.component.render(props);
 
 		return `
 		<html data-theme="dark">
@@ -53,7 +53,8 @@ export class ClientService {
 
 					const app = new App({
 						target: document.body,
-						hydrate: true
+						hydrate: true,
+						props: ${JSON.stringify(props, null, 4)}
 					});
 				</script>
 			</body>

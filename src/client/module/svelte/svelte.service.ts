@@ -62,8 +62,8 @@ export class SvelteService {
 		const preprocessed = await preprocess(contents, preprocessor({ typescript: { compilerOptions: { module: 'es2020', target: 'es2020' } } }), {
 			filename: path
 		});
-		const ssr = compile(preprocessed.code, { generate: 'ssr', hydratable: true, name: 'App' });
-		const dom = compile(preprocessed.code, { generate: 'dom', hydratable: true, sveltePath: '/__svelte__', name: 'App' });
+		const ssr = compile(preprocessed.code, { generate: 'ssr', hydratable: true, filename: path });
+		const dom = compile(preprocessed.code, { generate: 'dom', hydratable: true, sveltePath: '/__svelte__', filename: path });
 
 		return { ssr, dom };
 	}

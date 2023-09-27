@@ -8,8 +8,10 @@
 	"scripts": {
 		"build": "nest build",
 		"format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-		"start": "nest start",
-		"dev": "nest start --watch",
+		"start": "NODE_OPTIONS=\"--experimental-vm-modules\" nest start",
+		"dev": "NODE_OPTIONS=\"--experimental-vm-modules\" concurrently \"npm:dev:*\" -i --default-input-target client -k",
+		"dev:server": "nest build -w",
+		"dev:client": "nodemon --watch dist --watch src/client/components --watch src/client/routes -e svelte dist/main.js",
 		"start:debug": "nest start --debug --watch",
 		"start:prod": "node dist/main",
 		"lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
@@ -41,8 +43,10 @@
 		"@types/supertest": "^2.0.12",
 		"@typescript-eslint/eslint-plugin": "^5.60.0",
 		"@typescript-eslint/parser": "^5.60.0",
+		"concurrently": "^8.2.1",
 		"eslint": "^8.43.0",
 		"jest": "29.5.0",
+		"nodemon": "^3.0.1",
 		"source-map-support": "^0.5.21",
 		"supertest": "^6.3.3",
 		"ts-jest": "29.1.0",
@@ -69,3 +73,4 @@
 		"testEnvironment": "node"
 	}
 }
+
